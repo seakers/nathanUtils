@@ -1,3 +1,4 @@
+%%little endian (left-msb).
 function binary=de2biSubstitute(decimal,varargin)
     [m,n]=size(decimal);
     binaryStr=dec2bin(decimal,varargin{:});
