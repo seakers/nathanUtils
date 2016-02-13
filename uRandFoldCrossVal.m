@@ -9,20 +9,25 @@
 %%permMixer is the permutation array. put another way, if i is the ith
 %%object originally, f_i is the number in the fold
 % function [folds,permMixer,invPermMixer]=kfoldCrossVal(numObj,numFold,classes)
-%%whichFold is the fold number for an indexed object
-function [folds,whichFold]=kfoldCrossVal(numObj,numFold,classes)
+%%whichFold is the fold number for an indexed object, cell array as objects
+%%might be in multiple folds. empty entries denote not present in any fold.
+%%<><><><>
+%%right now thi is just kFoldCrossVal with allowed repetitions. 
+%%TODO: enable arbitrary resampling (including more than numObj)
+%%TODO: randoly allocate balance of folds.
+function [folds,whichFold]=uRandFoldCrossVal(numObj,numFold,classes)
 classVals=unique(classes);
 
 clsSizes=arrayfun(@(cls) sum(classes==cls),classVals,'UniformOutput',true);
 
 indxs=1:numObj;
 clsIndxs=arrayfun(@(cls) indxs(classes==cls),classVals,'UniformOutput',false);
-clsPerm=arrayfun(@(indx) randperm(clsSizes(indx)),1:length(classVals),'UniformOutput',false);
+clsSelect=arrayfun(@(indx) randi(clsSizes(indx),clsSizes(indx),1),1:length(classVals),'UniformOutput',false);
 
-clsPermIndxs=cell(size(clsPerm));
+clsPermIndxs=cell(size(clsSelect));
 for indx=1:length(clsIndxs)
     thisClsIndx=clsIndxs{indx};
-    clsPermIndxs{indx}=thisClsIndx(clsPerm{indx});
+    clsPermIndxs{indx}=thisClsIndx(clsSelect{indx});
 end
 
 folds=cell(numFold,1);
@@ -33,7 +38,7 @@ end
 totalLeft=sum(clsSizes);
 fillLevelFold=ones(numFold,1);
 clsFillLevel=1;
-whichFold=nan(numObj,1);
+whichFold=cell(numObj,1);
 while totalLeft>0
     for foldIndx=1:numFold
         thisFold=folds{foldIndx};
@@ -43,7 +48,7 @@ while totalLeft>0
             if(clsFillLevel<=length(thisCls))
                 placeObj=thisCls(clsFillLevel);
                 thisFold(fillLevelFold(foldIndx))=placeObj;
-                whichFold(placeObj)=foldIndx;
+                whichFold{placeObj}=[whichFold{placeObj},foldIndx];
                 fillLevelFold(foldIndx)=fillLevelFold(foldIndx)+1;
                 totalLeft=totalLeft-1;
             end
