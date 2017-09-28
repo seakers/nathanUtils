@@ -11,7 +11,7 @@ end
 
 vA=versionNum{1}{1}; vB=versionNum{2}{1};
 % assert length of vA and vB is 6 characters.
-yearA=int32(vA(2:5)); yearB=int32(vB(2:5));
+yearA=str2num(vA(2:5)); yearB=str2num(vB(2:5));
 if yearA<yearB
     ret= -1;
     return
